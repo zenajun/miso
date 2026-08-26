@@ -1,0 +1,1 @@
+export { default as RecipeCard } from './src/components/recipe-card/index.js'
