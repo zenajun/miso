@@ -3,8 +3,9 @@
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
     "paths": {
-      "@/*": ["./*"]
+      "@/config.js": ["./config.js"],
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.js", "config.js"]
+  "include": ["**/*.js"]
 }
