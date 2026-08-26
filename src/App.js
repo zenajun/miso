@@ -1,15 +1,11 @@
-
-// import RecipeCard from '@/components/recipe-card/index.js'
+import { Recipes } from '@/constants'
+import { RecipeList } from '@/config.js'
 
 function App() {
   return (
     <>
-      <h1>Welcome dsdfto Miso</h1>
-      {/* <RecipeCard
-        title="Miso-glazed salmon"
-        mealType="dinner"
-        prepTime={20}
-      /> */}
+      <h1>Welcome to Miso</h1>
+      <RecipeList recipes={Recipes} />
     </>
   )
 }
