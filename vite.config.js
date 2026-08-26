@@ -22,9 +22,16 @@ function jsxInJavaScript() {
 // https://vite.dev/config/
 export default defineConfig({
   resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./', import.meta.url)),
-    },
+    alias: [
+      {
+        find: '@/config.js',
+        replacement: fileURLToPath(new URL('./config.js', import.meta.url)),
+      },
+      {
+        find: '@',
+        replacement: fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    ],
   },
   plugins: [jsxInJavaScript(), react()],
 })

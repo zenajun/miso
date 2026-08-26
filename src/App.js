@@ -1,11 +1,15 @@
-import { useState } from 'react'
+
+// import RecipeCard from '@/components/recipe-card/index.js'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <h1>Welcome to Miso</h1>
+      <h1>Welcome dsdfto Miso</h1>
+      {/* <RecipeCard
+        title="Miso-glazed salmon"
+        mealType="dinner"
+        prepTime={20}
+      /> */}
     </>
   )
 }
