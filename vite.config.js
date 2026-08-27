@@ -31,6 +31,10 @@ export default defineConfig({
         find: '@',
         replacement: fileURLToPath(new URL('./src', import.meta.url)),
       },
+      {
+        find: '@component',
+        replacement: fileURLToPath(new URL('./src/components', import.meta.url)),
+      },
     ],
   },
   plugins: [jsxInJavaScript(), react()],

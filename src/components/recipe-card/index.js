@@ -1,4 +1,4 @@
-function RecipeCard({ title, mealType, prepTime }) {
+const RecipeCard = ({ title, mealType, prepTime }) => {
   // Reason: decide if this counts as a "quick" recipe
   const isQuick = prepTime <= 15;
 
@@ -9,7 +9,7 @@ function RecipeCard({ title, mealType, prepTime }) {
     marginBottom: '8px',
     backgroundColor: isQuick ? '#f0fff4' : '#fff',
   };
-
+  console.log('RecipeCard props:', { title, mealType, prepTime, isQuick });
   // Act: return the JSX that represents this decision
   return (
     <div style={cardStyle}>

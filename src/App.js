@@ -1,12 +1,16 @@
+import AppShell from '@component/app-shell'
+import  RecipeCard  from '@/components/recipe-card'
 import { Recipes } from '@/constants'
-import { RecipeList } from '@/config.js'
 
 function App() {
+  
   return (
-    <>
+    <AppShell>
       <h1>Welcome to Miso</h1>
-      <RecipeList recipes={Recipes} />
-    </>
+      {Recipes.map((recipe) => (
+        <RecipeCard key={recipe.title} {...recipe} />
+      ))}
+      </AppShell>    
   )
 }
 
