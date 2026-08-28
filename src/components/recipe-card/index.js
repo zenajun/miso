@@ -1,28 +1,22 @@
-const RecipeCard = ({ title, mealType, prepTime }) => {
-  // Reason: decide if this counts as a "quick" recipe
-  const isQuick = prepTime <= 15;
+import { Card, CardContent, Typography, Chip } from '@mui/material';
 
-  const cardStyle = {
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    padding: '12px 16px',
-    marginBottom: '8px',
-    backgroundColor: isQuick ? '#f0fff4' : '#fff',
-  };
-  console.log('RecipeCard props:', { title, mealType, prepTime, isQuick });
-  // Act: return the JSX that represents this decision
+function RecipeCard({ title, mealType, prepTimeMinutes, ingredients }) {
+  const isQuick = prepTimeMinutes <= 15;
+
   return (
-    <div style={cardStyle}>
-      <strong>{title}</strong>
-      <p style={{ margin: '4px 0', color: '#666' }}>
-        {mealType} · {prepTime} min
-      </p>
-      {isQuick && (
-        <span style={{ color: '#2e7d32', fontSize: '13px' }}>
-          Quick recipe
-        </span>
-      )}
-    </div>
+    <Card sx={{ mb: 1.5 }} variant="outlined">
+      <CardContent>
+        <Typography variant="subtitle1" fontWeight={600}>
+          {title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {mealType} · {prepTimeMinutes} min · {ingredients.length} ingredients
+        </Typography>
+        {isQuick && (
+          <Chip label="Quick recipe" color="success" size="small" sx={{ mt: 1 }} />
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
