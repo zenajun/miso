@@ -1,1 +1,1 @@
-export { default as Recipes } from './lib/recipes.js'
+export {default as Recipes} from './lib/recipes.js';

@@ -2,7 +2,7 @@ export default [
   {
     title: "Miso-glazed salmon",
     mealType: "Dinner",
-    prepTimeMinutes: 20,
+    prepTimeMinutes: '20',
     ingredients: [{ name: "salmon fillet" }, { name: "miso paste" }],
     instructions:
       "Whisk miso, mirin, and soy. Marinate salmon 15 min. Air fry at 200°C for 10 min.",
