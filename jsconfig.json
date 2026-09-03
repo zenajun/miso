@@ -8,5 +8,5 @@
       "@component/*": ["./src/components/*"]
     }
   },
-  "include": ["**/*.js"]
+  "include": ["**/*.js", "**/*.ts"]
 }
