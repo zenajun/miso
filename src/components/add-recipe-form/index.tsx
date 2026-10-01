@@ -1,25 +1,20 @@
-import {useState, type FormEvent} from 'react';
-import {
-    Box,
-    TextField,
-    Select,
-    MenuItem,
-    InputLabel,
-    FormControl,
-    Button,
-} from '@mui/material';
-import type {Recipe} from '@/constants/lib/types';
+import {useState, type SubmitEvent} from 'react';
+import {useDispatch} from 'react-redux';
+import {Box, TextField, Select, MenuItem, InputLabel, FormControl, Button} from '@mui/material';
+import {addRecipe} from '@/features/recipes/recipesSlice';
+import type {AppDispatch} from '@/store';
 
-const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Sweet'];
+const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Sweet'] as const;
 
-function AddRecipeForm({onAdd}: {onAdd: (recipe: Recipe) => void}) {
+function AddRecipeForm() {
+    const dispatch = useDispatch<AppDispatch>();
     const [title, setTitle] = useState('');
     const [ingredientsText, setIngredientsText] = useState('');
     const [prepTime, setPrepTime] = useState('');
-    const [mealType, setMealType] = useState<Recipe['mealType']>('Dinner');
+    const [mealType, setMealType] = useState<(typeof mealTypes)[number]>('Dinner');
     const [instructions, setInstructions] = useState('');
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!title.trim()) return;
 
@@ -29,15 +24,16 @@ function AddRecipeForm({onAdd}: {onAdd: (recipe: Recipe) => void}) {
             .filter(Boolean)
             .map((name) => ({name})); // quantity/unit/costPerUnit come later, Day 23
 
-        onAdd({
-            title,
-            mealType,
-            prepTimeMinutes: Number(prepTime) || 0,
-            ingredients,
-            instructions,
-            tags: [],
-        });
-
+        dispatch(
+            addRecipe({
+                title,
+                mealType,
+                prepTimeMinutes: Number(prepTime) || 0,
+                ingredients,
+                instructions,
+                tags: [],
+            }),
+        );
         // reset for the next entry
         setTitle('');
         setIngredientsText('');
@@ -57,13 +53,7 @@ function AddRecipeForm({onAdd}: {onAdd: (recipe: Recipe) => void}) {
                 maxWidth: 480,
             }}
         >
-            <TextField
-                label='Recipe title'
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                size='small'
-            />
-
+            <TextField label='Recipe title' value={title} onChange={(e) => setTitle(e.target.value)} size='small' />
             <Box sx={{display: 'flex', gap: 1.5}}>
                 <TextField
                     label='Prep time (min)'
@@ -77,9 +67,7 @@ function AddRecipeForm({onAdd}: {onAdd: (recipe: Recipe) => void}) {
                     <Select
                         value={mealType}
                         label='Meal type'
-                        onChange={(e) =>
-                            setMealType(e.target.value as Recipe['mealType'])
-                        }
+                        onChange={(e) => setMealType(e.target.value as typeof mealType)}
                     >
                         {mealTypes.map((type) => (
                             <MenuItem key={type} value={type}>
@@ -89,7 +77,6 @@ function AddRecipeForm({onAdd}: {onAdd: (recipe: Recipe) => void}) {
                     </Select>
                 </FormControl>
             </Box>
-
             <TextField
                 label='Ingredients (one per line)'
                 value={ingredientsText}
@@ -98,7 +85,6 @@ function AddRecipeForm({onAdd}: {onAdd: (recipe: Recipe) => void}) {
                 rows={4}
                 size='small'
             />
-
             <TextField
                 label='Instructions'
                 value={instructions}
@@ -107,7 +93,6 @@ function AddRecipeForm({onAdd}: {onAdd: (recipe: Recipe) => void}) {
                 rows={3}
                 size='small'
             />
-
             <Button type='submit' variant='contained'>
                 Add recipe
             </Button>
