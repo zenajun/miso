@@ -3,7 +3,7 @@ import {useSelector} from 'react-redux';
 import {RootState} from './store';
 import AppShell from '@component/app-shell';
 import AddRecipeForm from '@/components/add-recipe-form';
-import RecipeCard from '@/components/recipe-card';
+import RecipeGrid from '@/components/recipe-grid';
 
 const STORAGE_KEY = 'recipes';
 
@@ -17,9 +17,7 @@ function App() {
     return (
         <AppShell>
             <AddRecipeForm />
-            {recipes.map((recipe) => (
-                <RecipeCard key={recipe.id} {...recipe} />
-            ))}
+            <RecipeGrid />
         </AppShell>
     );
 }
