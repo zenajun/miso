@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
     "paths": {
       "@/config.js": ["./config.js"],
       "@/*": ["./src/*"],
       "@component/*": ["./src/components/*"]
     }
   },
-  "include": ["**/*.js", "**/*.ts"]
+  "include": ["**/*.js", "**/*.jsx"]
 }

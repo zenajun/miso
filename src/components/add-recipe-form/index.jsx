@@ -1,20 +1,19 @@
-import {useState, type SubmitEvent} from 'react';
+import {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {Box, TextField, Select, MenuItem, InputLabel, FormControl, Button} from '@mui/material';
 import {addRecipe} from '@/features/recipes/recipesSlice';
-import type {AppDispatch} from '@/store';
 
-const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Sweet'] as const;
+const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Sweet'];
 
 function AddRecipeForm() {
-    const dispatch = useDispatch<AppDispatch>();
+    const dispatch = useDispatch();
     const [title, setTitle] = useState('');
     const [ingredientsText, setIngredientsText] = useState('');
     const [prepTime, setPrepTime] = useState('');
-    const [mealType, setMealType] = useState<(typeof mealTypes)[number]>('Dinner');
+    const [mealType, setMealType] = useState('Dinner');
     const [instructions, setInstructions] = useState('');
 
-    const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!title.trim()) return;
 
@@ -22,7 +21,7 @@ function AddRecipeForm() {
             .split('\n')
             .map((line) => line.trim())
             .filter(Boolean)
-            .map((name) => ({name})); // quantity/unit/costPerUnit come later, Day 23
+            .map((name) => ({name}));
 
         dispatch(
             addRecipe({
@@ -34,7 +33,6 @@ function AddRecipeForm() {
                 tags: [],
             }),
         );
-        // reset for the next entry
         setTitle('');
         setIngredientsText('');
         setPrepTime('');
@@ -67,7 +65,7 @@ function AddRecipeForm() {
                     <Select
                         value={mealType}
                         label='Meal type'
-                        onChange={(e) => setMealType(e.target.value as typeof mealType)}
+                        onChange={(e) => setMealType(e.target.value)}
                     >
                         {mealTypes.map((type) => (
                             <MenuItem key={type} value={type}>

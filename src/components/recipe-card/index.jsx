@@ -1,7 +1,6 @@
 import {Card, CardContent, Typography, Chip} from '@mui/material';
-import type {Recipe} from '@/constants/lib/types';
 
-function RecipeCard({title, mealType, prepTimeMinutes, ingredients}: Recipe) {
+function RecipeCard({title, mealType, prepTimeMinutes, ingredients}) {
     const isQuick = prepTimeMinutes <= 15;
 
     return (
