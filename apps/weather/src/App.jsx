@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import {getAdvice} from 'weather-advice';
 
 const FALLBACK_LOCATION = {name: 'Toronto', latitude: 43.65, longitude: -79.38};
 
@@ -73,6 +74,7 @@ function App() {
                     throw new Error(`Request failed with status ${res.status}`);
                 const data = await res.json();
                 console.log(data);
+                console.log(getAdvice(data, new Date().getHours()));
                 setForecast(data);
             } catch (err) {
                 setError(err.message);

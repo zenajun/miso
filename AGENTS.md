@@ -11,6 +11,7 @@ A pnpm monorepo that houses all my apps. Plain JavaScript, no TypeScript.
 
 - `pnpm install` : install everything, run from the repo root
 - `pnpm --filter weather dev` : run the weather app
+- `pnpm --filter weather-advice test` : run the weather-advice tests
 
 ## Conventions
 
@@ -23,4 +24,9 @@ A pnpm monorepo that houses all my apps. Plain JavaScript, no TypeScript.
 
 - [x] Workspace and weather app scaffolded
 - [x] Weather data fetch
-- [ ] packages/weather-advice
+- [x] packages/weather-advice
+
+## Planned apps (after weather)
+
+- [ ] YouTube player with rewind and fast-forward controls
+- [ ] Price tracker
