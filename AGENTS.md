@@ -20,6 +20,12 @@ A pnpm monorepo that houses all my apps. Plain JavaScript, no TypeScript.
 - Keep logic that doesn't need React (like `getAdvice`) in plain functions.
 - Never commit secrets or `.env` files.
 
+## Decisions and limits
+- Forecast is requested for one day starting at midnight, so index = hour of day. This breaks if forecast_days changes.
+- "Later today" includes the current hour.
+- Default city is Toronto, used whenever geolocation is unavailable.
+- Fetching lives in loadForecast(); the data is validated once there.
+
 ## Status
 
 - [x] Workspace and weather app scaffolded

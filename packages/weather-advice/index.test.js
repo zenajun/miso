@@ -66,3 +66,18 @@ test('rain, uv and temp below boundary, no advice', () => {
         [],
     );
 });
+test("missing forecast gives no advice", () => {
+  assert.deepEqual(getAdvice(null, 9), []);
+  assert.deepEqual(getAdvice({}, 9), []);
+});
+
+test("null readings are ignored", () => {
+  const forecast = {
+    hourly: {
+      precipitation_probability: [null, null],
+      uv_index: [null],
+      temperature_2m: [],
+    },
+  };
+  assert.deepEqual(ids(getAdvice(forecast, 0)), []);
+});
