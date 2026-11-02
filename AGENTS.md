@@ -25,6 +25,7 @@ A pnpm monorepo that houses all my apps. Plain JavaScript, no TypeScript.
 - [x] Workspace and weather app scaffolded
 - [x] Weather data fetch
 - [x] packages/weather-advice
+- [x] weather screen
 
 ## Planned apps (after weather)
 
