@@ -1,102 +1,100 @@
 import {useEffect, useState} from 'react';
 import {getAdvice} from 'weather-advice';
 
-const FALLBACK_LOCATION = {name: 'Toronto', latitude: 43.65, longitude: -79.38};
+const DEFAULT_PLACE = {name: 'Toronto', latitude: 43.65, longitude: -79.38};
 
-const HOURLY_FIELDS = [
-    'temperature_2m',
-    'apparent_temperature',
-    'relative_humidity_2m',
-    'precipitation_probability',
-    'precipitation',
-    'rain',
-    'showers',
-    'snowfall',
-    'snow_depth',
-    'uv_index',
-];
-
-// Once-per-day values, so the API returns them under `daily`, not `hourly`.
-const DAILY_FIELDS = ['sunrise', 'sunset', 'daylight_duration'];
-
-function forecastUrl(latitude, longitude) {
-    const params = new URLSearchParams({
-        latitude,
-        longitude,
-        hourly: HOURLY_FIELDS.join(','),
-        daily: DAILY_FIELDS.join(','),
-        timezone: 'auto',
-        forecast_days: 1,
-    });
-    return `https://api.open-meteo.com/v1/forecast?${params}`;
-}
-
-function getPosition() {
-    return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) {
-            reject(new Error('Geolocation is not supported'));
+function getLocation() {
+    return new Promise((resolve) => {
+        const fallback = {...DEFAULT_PLACE, isDefault: true};
+        if (!('geolocation' in navigator)) {
+            resolve(fallback);
             return;
         }
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-            timeout: 10000,
-        });
+        navigator.geolocation.getCurrentPosition(
+            (pos) =>
+                resolve({
+                    name: 'Your location',
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    isDefault: false,
+                }),
+            () => resolve(fallback),
+            {timeout: 8000},
+        );
     });
 }
 
-// Rounded to 2 decimals (~1 km): enough for weather, and the API never sees the exact spot.
-async function getCoordinates() {
-    try {
-        const {coords} = await getPosition();
-        return {
-            latitude: coords.latitude.toFixed(2),
-            longitude: coords.longitude.toFixed(2),
-            usedFallback: false,
-        };
-    } catch {
-        return {...FALLBACK_LOCATION, usedFallback: true};
-    }
+function buildUrl({latitude, longitude}) {
+    return `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation_probability,uv_index&timezone=auto&forecast_days=1`;
+}
+
+function currentHourAt(data) {
+    const localMs = Date.now() + data.utc_offset_seconds * 1000;
+    return new Date(localMs).getUTCHours();
 }
 
 function App() {
-    const [forecast, setForecast] = useState(null);
-    const [usedFallback, setUsedFallback] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [state, setState] = useState({status: 'loading'});
 
     useEffect(() => {
         async function load() {
             try {
-                const {latitude, longitude, usedFallback} =
-                    await getCoordinates();
-                setUsedFallback(usedFallback);
-                const res = await fetch(forecastUrl(latitude, longitude));
+                const place = await getLocation();
+                const res = await fetch(buildUrl(place));
                 if (!res.ok)
                     throw new Error(`Request failed with status ${res.status}`);
                 const data = await res.json();
-                console.log(data);
-                console.log(getAdvice(data, new Date().getHours()));
-                setForecast(data);
+                setState({status: 'ready', place, data});
             } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
+                setState({status: 'error', message: err.message});
             }
         }
         load();
     }, []);
 
-    if (loading) return <p>Finding your location...</p>;
-    if (error) return <p>Could not load the forecast: {error}</p>;
+    if (state.status === 'loading') return <p>Loading forecast...</p>;
+    if (state.status === 'error')
+        return <p>Could not load the forecast: {state.message}</p>;
+
+    const {place, data} = state;
+    const hour = currentHourAt(data);
+    const advice = getAdvice(data, hour);
+
     return (
-        <>
-            {usedFallback && (
-                <p>Showing {FALLBACK_LOCATION.name}, location unavailable.</p>
+        <main>
+            <h1>{place.name}</h1>
+            {place.isDefault && (
+                <p>
+                    Showing the default city because your location was not
+                    available.
+                </p>
             )}
-            <p>
-                Got {forecast.hourly.time.length} hours of data. Check the
-                console.
-            </p>
-        </>
+
+            <section>
+                <h2>Right now</h2>
+                <p>
+                    {data.hourly.temperature_2m[hour]}
+                    {data.hourly_units.temperature_2m}
+                </p>
+                <p>
+                    Rain chance: {data.hourly.precipitation_probability[hour]}%
+                </p>
+                <p>UV index: {data.hourly.uv_index[hour]}</p>
+            </section>
+
+            <section>
+                <h2>What to bring</h2>
+                {advice.length === 0 ? (
+                    <p>Nothing special today.</p>
+                ) : (
+                    <ul>
+                        {advice.map((a) => (
+                            <li key={a.id}>{a.message}</li>
+                        ))}
+                    </ul>
+                )}
+            </section>
+        </main>
     );
 }
 
