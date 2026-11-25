@@ -46,6 +46,12 @@ Apps can't be started on their own any more (`pnpm --filter weather dev` is gone
 - Never commit secrets or `.env` files.
 - New app: create `apps/<name>/index.html` (use `./` relative paths), add `<name>` to `appNames` in the root `vite.config.js`, add it to `packages/app-nav/apps.js`, add `"app-nav": "workspace:*"` to its dependencies, and `import 'app-nav'` in its entry file.
 
+## Decisions and limits
+- Forecast is requested for one day starting at midnight, so index = hour of day. This breaks if forecast_days changes.
+- "Later today" includes the current hour.
+- Default city is Toronto, used whenever geolocation is unavailable.
+- Fetching lives in loadForecast(); the data is validated once there.
+
 ## Status
 
 - [x] Workspace and weather app scaffolded

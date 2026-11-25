@@ -3,6 +3,34 @@ import {getAdvice} from 'weather-advice';
 
 const DEFAULT_PLACE = {name: 'Toronto', latitude: 43.65, longitude: -79.38};
 
+async function loadForecast() {
+    const place = await getLocation();
+
+    let res;
+    try {
+        res = await fetch(buildUrl(place));
+    } catch {
+        throw new Error(
+            'Could not reach the forecast service. Check your connection.',
+        );
+    }
+    if (!res.ok) {
+        throw new Error(
+            `The forecast service returned an error (${res.status}).`,
+        );
+    }
+
+    const data = await res.json();
+    if (!data?.hourly?.time) {
+        throw new Error('The forecast came back in an unexpected format.');
+    }
+    return {place, data};
+}
+
+function show(value, suffix = '') {
+    return value == null ? 'n/a' : `${value}${suffix}`;
+}
+
 function getLocation() {
     return new Promise((resolve) => {
         const fallback = {...DEFAULT_PLACE, isDefault: true};
@@ -59,7 +87,8 @@ function App() {
             {place.isDefault && (
                 <p>
                     Showing the default city because your location was not
-                    available.
+                    available. Allow location access in your browser and reload
+                    to see your own forecast.
                 </p>
             )}
 
@@ -79,7 +108,10 @@ function App() {
             <section>
                 <h2>What to bring</h2>
                 {advice.length === 0 ? (
-                    <p>Nothing special today.</p>
+                    <p>
+                        No rain, strong sun, or heat expected from now on.
+                        Nothing special to bring.
+                    </p>
                 ) : (
                     <ul>
                         {advice.map((a) => (
@@ -91,5 +123,4 @@ function App() {
         </main>
     );
 }
-
 export default App;
