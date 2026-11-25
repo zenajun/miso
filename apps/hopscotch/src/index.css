@@ -1,0 +1,68 @@
+/* Deep winter palette. Light = snow and frost, dark = midnight and ice.
+   index.html sets data-theme on <html> before the page renders. */
+:root {
+  --bg: #f3f6fa;
+  --bg-deep: #e1e9f2;
+  --glow-1: rgba(126, 170, 204, 0.35);
+  --glow-2: rgba(44, 95, 87, 0.14);
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-faint: rgba(255, 255, 255, 0.35);
+  --surface-border: rgba(15, 27, 45, 0.1);
+  --surface-border-strong: rgba(15, 27, 45, 0.2);
+  --text: #34445a;
+  --text-h: #0f1b2d;
+  --muted: #64758b;
+  --accent: #1d5b87;
+  --accent-strong: #14466a;
+  --accent-soft: rgba(29, 91, 135, 0.1);
+  --on-accent: #fff;
+  --pine: #2c5f57;
+  --berry: #a3304c;
+  --snow: #9db7cf;
+  --shadow: 0 1px 2px rgba(15, 27, 45, 0.06), 0 8px 24px rgba(15, 27, 45, 0.08);
+  --shadow-lg: 0 24px 60px -12px rgba(15, 27, 45, 0.35);
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 16px/1.5 var(--sans);
+  color-scheme: light;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+:root[data-theme='dark'] {
+  --bg: #08101c;
+  --bg-deep: #0e1a2b;
+  --glow-1: rgba(60, 110, 160, 0.28);
+  --glow-2: rgba(60, 120, 105, 0.18);
+  --surface: rgba(20, 34, 54, 0.66);
+  --surface-faint: rgba(20, 34, 54, 0.3);
+  --surface-border: rgba(190, 215, 235, 0.1);
+  --surface-border-strong: rgba(190, 215, 235, 0.2);
+  --text: #b4c3d4;
+  --text-h: #eef4fa;
+  --muted: #7d8fa5;
+  --accent: #8ec5ea;
+  --accent-strong: #b7dcf4;
+  --accent-soft: rgba(142, 197, 234, 0.14);
+  --on-accent: #08101c;
+  --pine: #7fb5a5;
+  --berry: #ec7d97;
+  --snow: #eaf3fb;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, var(--glow-1), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, var(--glow-2), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+  background-attachment: fixed;
+  transition: background-color 0.3s;
+}

@@ -1,122 +1,126 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import {useQuery} from '@tanstack/react-query';
+import {getAdvice} from 'weather-advice';
 
-function App() {
-  const [count, setCount] = useState(0)
+const DEFAULT_PLACE = {name: 'Toronto', latitude: 43.65, longitude: -79.38};
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+async function loadForecast() {
+    const place = await getLocation();
 
-      <div className="ticks"></div>
+    let res;
+    try {
+        res = await fetch(buildUrl(place));
+    } catch {
+        throw new Error(
+            'Could not reach the forecast service. Check your connection.',
+        );
+    }
+    if (!res.ok) {
+        throw new Error(
+            `The forecast service returned an error (${res.status}).`,
+        );
+    }
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    const data = await res.json();
+    if (!data?.hourly?.time) {
+        throw new Error('The forecast came back in an unexpected format.');
+    }
+    return {place, data};
 }
 
-export default App
+function show(value, suffix = '') {
+    return value == null ? 'n/a' : `${value}${suffix}`;
+}
+
+function getLocation() {
+    return new Promise((resolve) => {
+        const fallback = {...DEFAULT_PLACE, isDefault: true};
+        if (!('geolocation' in navigator)) {
+            resolve(fallback);
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (pos) =>
+                resolve({
+                    name: 'Your location',
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    isDefault: false,
+                }),
+            () => resolve(fallback),
+            {timeout: 8000},
+        );
+    });
+}
+
+function buildUrl({latitude, longitude}) {
+    return `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation_probability,uv_index&timezone=auto&forecast_days=1`;
+}
+
+function currentHourAt(data) {
+    const localMs = Date.now() + data.utc_offset_seconds * 1000;
+    return new Date(localMs).getUTCHours();
+}
+
+function App() {
+    // const [state, setState] = useState({status: 'loading'});
+    const {isPending, error, data} = useQuery({
+        queryKey: ['weather'],
+        queryFn: async function () {
+            const place = await getLocation();
+            const res = await fetch(buildUrl(place));
+
+            if (!res.ok)
+                throw new Error(`Request failed with status ${res.status}`);
+            return {forecast: await res.json(), place};
+        },
+    });
+
+    if (isPending) return <p>Loading forecast...</p>;
+    if (error) return <p>Could not load the forecast: {error.message}</p>;
+    const {place, forecast} = data;
+    const hour = currentHourAt(forecast);
+    const advice = getAdvice(forecast, hour);
+
+    return (
+        <main>
+            <h1>{place.name}</h1>
+            {place.isDefault && (
+                <p>
+                    Showing the default city because your location was not
+                    available. Allow location access in your browser and reload
+                    to see your own forecast.
+                </p>
+            )}
+
+            <section>
+                <h2>Right now</h2>
+                <p>
+                    {forecast.hourly.temperature_2m[hour]}
+                    {forecast.hourly_units.temperature_2m}
+                </p>
+                <p>
+                    Rain chance:{' '}
+                    {forecast.hourly.precipitation_probability[hour]}%
+                </p>
+                <p>UV index: {forecast.hourly.uv_index[hour]}</p>
+            </section>
+
+            <section>
+                <h2>What to bring</h2>
+                {advice.length === 0 ? (
+                    <p>
+                        No rain, strong sun, or heat expected from now on.
+                        Nothing special to bring.
+                    </p>
+                ) : (
+                    <ul>
+                        {advice.map((a) => (
+                            <li key={a.id}>{a.message}</li>
+                        ))}
+                    </ul>
+                )}
+            </section>
+        </main>
+    );
+}
+export default App;
