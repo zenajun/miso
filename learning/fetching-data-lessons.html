@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fetching Data Lessons</title>
+<style>
+  :root {
+    --bg: #0a1220;          /* midnight */
+    --bg-2: #101c30;        /* deep navy */
+    --card: #14233a;        /* winter night */
+    --card-done: #13302f;   /* spruce */
+    --line: #26395a;
+    --text: #dbe7f1;        /* frost */
+    --muted: #8ea5bf;       /* slate ice */
+    --accent: #7fb8d8;      /* glacier blue */
+    --pine: #4f9e8c;        /* aurora pine */
+    --berry: #b0566d;       /* winter berry */
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%) fixed;
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 40px 16px 80px; }
+  h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .key {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 18px; margin-bottom: 24px; color: var(--muted);
+  }
+  .key strong { color: var(--text); }
+
+  .progress {
+    position: sticky; top: 0; z-index: 1; padding: 12px 0;
+    background: var(--bg); display: flex; align-items: center; gap: 12px;
+  }
+  .bar { flex: 1; height: 10px; background: var(--card); border-radius: 99px; overflow: hidden; border: 1px solid var(--line); }
+  .fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--pine)); transition: width .3s; }
+  .count { font-variant-numeric: tabular-nums; color: var(--muted); min-width: 4.5em; text-align: right; }
+  button {
+    background: transparent; color: var(--muted); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 12px; font: inherit; font-size: .85rem; cursor: pointer;
+  }
+  button:hover { color: var(--text); border-color: var(--accent); }
+
+  section.lesson {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px 22px; margin: 18px 0; transition: background .3s, border-color .3s;
+  }
+  section.lesson.done { background: var(--card-done); border-color: var(--pine); }
+  .lesson h2 { margin: 0 0 12px; font-size: 1.25rem; display: flex; gap: 10px; align-items: baseline; }
+  .num { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .badge { margin-left: auto; font-size: .8rem; color: var(--pine); opacity: 0; transition: opacity .3s; }
+  .done .badge { opacity: 1; }
+  .label { color: var(--accent); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+  .lesson p { margin: 4px 0 12px; }
+  .warn { color: var(--berry); }
+  code {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 1px 5px; font-size: .9em; color: var(--accent);
+  }
+
+  ul.checks { list-style: none; padding: 0; margin: 14px 0 0; border-top: 1px solid var(--line); padding-top: 12px; }
+  ul.checks li { margin: 6px 0; }
+  ul.checks label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  input[type=checkbox] { accent-color: var(--pine); width: 18px; height: 18px; margin-top: 3px; flex: none; }
+  input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+
+  .footer { color: var(--muted); margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Fetching Data</h1>
+  <p class="sub">Six lessons. Do 1–4 by hand before touching any library.</p>
+
+  <div class="key">
+    <strong>The analogy throughout:</strong> your browser is a <strong>customer</strong>,
+    the API server is a <strong>restaurant kitchen</strong>, and a request is an <strong>order</strong>.
+  </div>
+
+  <div class="progress">
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <span class="count" id="count">0 / 0</span>
+    <button id="reset" type="button">Reset</button>
+  </div>
+
+  <section class="lesson">
+    <h2><span class="num">1</span> fetch: ordering for yourself <span class="badge">✓ complete</span></h2>
+    <p><span class="label">Analogy</span><br>You phone the kitchen yourself. Food arrives in a sealed bag. You open it (<code>res.json()</code>) and check it's actually your order (<code>res.ok</code>). If the kitchen says "we're out of that" (a 404 or 500), the phone call still succeeded, so <code>fetch</code> won't complain. It only fails if the phone line is dead (a network error).</p>
+    <p><span class="label">What it really is</span><br>A function built into the browser. It returns a promise, so everything from the promises quiz applies here.</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" data-id="l1-read"><span>Read and understand the analogy and the mechanics</span></label></li>
+      <li><label><input type="checkbox" data-id="l1-ok"><span>Add a <code>res.ok</code> check to the weather fetch in <code>apps/weather/src/App.jsx</code></span></label></li>
+      <li><label><input type="checkbox" data-id="l1-state"><span>Add loading and error state</span></label></li>
+      <li><label><input type="checkbox" data-id="l1-break"><span>Break the URL on purpose and watch what happens</span></label></li>
+      <li><label><input type="checkbox" data-id="l1-q"><span>Answer: why does a 404 not trigger <code>.catch</code>?</span></label></li>
+    </ul>
+  </section>
+
+  <section class="lesson">
+    <h2><span class="num">2</span> Headers: the notes on the order slip <span class="badge">✓ complete</span></h2>
+    <p><span class="label">Analogy</span><br>The food is the <strong>body</strong>. Headers are the notes clipped to the order: "I want it boxed" (<code>Accept: application/json</code>), "here's my membership card" (<code>Authorization</code>), "this is soup" (<code>Content-Type</code>). The kitchen clips its own notes to the reply: "eat within 10 minutes" (<code>Cache-Control</code>).</p>
+    <p><span class="label">What it really is</span><br>Key-value metadata about the request or response. It describes the data but isn't the data.</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" data-id="l2-read"><span>Read and understand the analogy and the mechanics</span></label></li>
+      <li><label><input type="checkbox" data-id="l2-devtools"><span>Open DevTools → Network, click the weather request, and read every request and response header</span></label></li>
+      <li><label><input type="checkbox" data-id="l2-custom"><span>Send a custom header from <code>fetch</code></span></label></li>
+      <li><label><input type="checkbox" data-id="l2-q"><span>Answer: where would an API key usually go, the body or a header?</span></label></li>
+    </ul>
+  </section>
+
+  <section class="lesson">
+    <h2><span class="num">3</span> CORS: the strict parent <span class="badge">✓ complete</span></h2>
+    <p><span class="label">Analogy</span><br>The browser is a strict parent. Your page (a kid from house A) orders from kitchen B. The parent asks kitchen B, "do you serve kids from house A?" If kitchen B's reply doesn't include <code>Access-Control-Allow-Origin: A</code>, the parent takes the food away. Often <strong>the order already reached the kitchen</strong>; you just aren't allowed to eat it. For some orders, the parent phones ahead first. That's the "preflight" <code>OPTIONS</code> request.</p>
+    <p><span class="label">What it really is</span><br>CORS (Cross-Origin Resource Sharing) is a browser-only safety rule. Server-to-server calls, and tools like curl or Postman, have no parent, so there's no CORS.</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" data-id="l3-read"><span>Read and understand the analogy and the mechanics</span></label></li>
+      <li><label><input type="checkbox" data-id="l3-trigger"><span>Fetch from an API that doesn't allow your origin and trigger a CORS error</span></label></li>
+      <li><label><input type="checkbox" data-id="l3-inspect"><span>Read the console error and find the preflight request in the Network tab</span></label></li>
+      <li><label><input type="checkbox" data-id="l3-q"><span>Answer: why does the same request work in Postman but fail in the browser?</span></label></li>
+    </ul>
+  </section>
+
+  <section class="lesson">
+    <h2><span class="num">4</span> Reverse proxy: your own waiter <span class="badge">✓ complete</span></h2>
+    <p><span class="label">Analogy</span><br>Instead of ordering from kitchen B directly, you give your order to a waiter in <strong>your own house</strong>. The waiter walks it over to kitchen B. The parent sees you ordering at home, so CORS doesn't apply. The waiter also holds the membership card, so you never see the secret key.</p>
+    <p><span class="label">What it really is</span><br>A server between your app and the real API that forwards requests. It's used to avoid CORS, hide API keys, cache responses, and spread load across servers. Examples are Vite's <code>server.proxy</code> while developing, and Nginx, Netlify redirects, or a backend route in production.</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" data-id="l4-read"><span>Read and understand the analogy and the mechanics</span></label></li>
+      <li><label><input type="checkbox" data-id="l4-proxy"><span>Add <code>server.proxy</code> to <code>apps/weather/vite.config.js</code> (now in the root <code>vite.config.js</code>, shared by all apps)</span></label></li>
+      <li><label><input type="checkbox" data-id="l4-switch"><span>Change the fetch to call <code>/api/...</code> and confirm it still works</span></label></li>
+      <li><label><input type="checkbox" data-id="l4-q"><span>Answer: why is an API key in frontend code a problem, even when it's "hidden" in an env variable?</span></label></li>
+    </ul>
+  </section>
+
+  <section class="lesson">
+    <h2><span class="num">5</span> Axios: a personal assistant <span class="badge">✓ complete</span></h2>
+    <p><span class="label">Analogy</span><br>An assistant makes the call for you. They open the bag automatically, tell you if the kitchen got your order wrong (they reject on 4xx/5xx), and show your membership card on every call without being asked (interceptors).</p>
+    <p><span class="label">What it really is</span><br>A library that wraps HTTP requests. It's convenient, but it's extra code to ship. <strong>Why not just use fetch for everything?</strong> You can, and many teams do. Axios mostly saves you boilerplate. The real gaps in fetch show up <em>after</em> the data arrives, and Lesson 6 covers those.</p>
+    <p class="warn">⚠ Axios is a new dependency, so you could do this in a scratch file instead.</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" data-id="l5-read"><span>Read and understand the analogy and the mechanics</span></label></li>
+      <li><label><input type="checkbox" data-id="l5-both"><span>Write the weather call with fetch and then with axios</span></label></li>
+      <li><label><input type="checkbox" data-id="l5-compare"><span>Compare them line by line: what does axios do that you had to write yourself?</span></label></li>
+    </ul>
+  </section>
+
+  <section class="lesson">
+    <h2><span class="num">6</span> Server state vs app state: React Query and Zustand <span class="badge">✓ complete</span></h2>
+    <p><span class="label">Analogy</span><br><strong>Zustand is not a fetching tool.</strong> It's the <strong>fridge</strong>: shared storage where every component in the house can grab things like a theme, a cart, or a selected city. It doesn't know or care where the food came from.<br><br><strong>React Query is a smart fridge</strong> for food from kitchens. It remembers what you ordered, knows when it's gone stale and reorders, and doesn't order twice if two people ask at once. It also tracks "food is on its way" (loading) and "order failed" (error) for you.</p>
+    <p><span class="label">Key idea</span><br>Data the <em>server</em> owns (the weather) needs different tools from data <em>your app</em> owns (which tab is open).</p>
+    <p class="warn">⚠ React Query is a new dependency.</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" data-id="l6-read"><span>Read and understand the analogy and the mechanics</span></label></li>
+      <li><label><input type="checkbox" data-id="l6-refactor"><span>Refactor the weather fetch to use <code>useQuery</code></span></label></li>
+      <li><label><input type="checkbox" data-id="l6-delete"><span>Delete the loading and error state you wrote by hand in Lesson 1</span></label></li>
+      <li><label><input type="checkbox" data-id="l6-q"><span>Answer: where would you store "the user's selected city", and where would you store "the forecast for that city"?</span></label></li>
+    </ul>
+  </section>
+
+  <p class="footer">Your progress is saved in this browser.</p>
+</main>
+
+<script>
+  const KEY = "fetching-data-lessons";
+  const boxes = [...document.querySelectorAll('input[type=checkbox]')];
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
+  }
+  function save(state) {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+  }
+
+  function render() {
+    const done = boxes.filter(b => b.checked).length;
+    document.getElementById("count").textContent = `${done} / ${boxes.length}`;
+    document.getElementById("fill").style.width = `${(done / boxes.length) * 100}%`;
+    document.querySelectorAll("section.lesson").forEach(sec => {
+      const own = [...sec.querySelectorAll('input[type=checkbox]')];
+      sec.classList.toggle("done", own.every(b => b.checked));
+    });
+  }
+
+  const state = load();
+  boxes.forEach(b => {
+    b.checked = !!state[b.dataset.id];
+    b.addEventListener("change", () => {
+      state[b.dataset.id] = b.checked;
+      save(state);
+      render();
+    });
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    if (!confirm("Clear all progress?")) return;
+    boxes.forEach(b => { b.checked = false; state[b.dataset.id] = false; });
+    save(state);
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>

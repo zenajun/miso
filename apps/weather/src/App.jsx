@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useQuery} from '@tanstack/react-query';
 import {getAdvice} from 'weather-advice';
 
 const DEFAULT_PLACE = {name: 'Toronto', latitude: 43.65, longitude: -79.38};
@@ -25,7 +25,7 @@ function getLocation() {
 }
 
 function buildUrl({latitude, longitude}) {
-    return `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation_probability,uv_index&timezone=auto&forecast_days=1`;
+    return `/api/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation_probability,uv_index&timezone=auto&forecast_days=1`;
 }
 
 function currentHourAt(data) {
@@ -34,31 +34,24 @@ function currentHourAt(data) {
 }
 
 function App() {
-    const [state, setState] = useState({status: 'loading'});
+    // const [state, setState] = useState({status: 'loading'});
+    const {isPending, error, data} = useQuery({
+        queryKey: ['weather'],
+        queryFn: async function () {
+            const place = await getLocation();
+            const res = await fetch(buildUrl(place));
 
-    useEffect(() => {
-        async function load() {
-            try {
-                const place = await getLocation();
-                const res = await fetch(buildUrl(place));
-                if (!res.ok)
-                    throw new Error(`Request failed with status ${res.status}`);
-                const data = await res.json();
-                setState({status: 'ready', place, data});
-            } catch (err) {
-                setState({status: 'error', message: err.message});
-            }
-        }
-        load();
-    }, []);
+            if (!res.ok)
+                throw new Error(`Request failed with status ${res.status}`);
+            return {forecast: await res.json(), place};
+        },
+    });
 
-    if (state.status === 'loading') return <p>Loading forecast...</p>;
-    if (state.status === 'error')
-        return <p>Could not load the forecast: {state.message}</p>;
-
-    const {place, data} = state;
-    const hour = currentHourAt(data);
-    const advice = getAdvice(data, hour);
+    if (isPending) return <p>Loading forecast...</p>;
+    if (error) return <p>Could not load the forecast: {error.message}</p>;
+    const {place, forecast} = data;
+    const hour = currentHourAt(forecast);
+    const advice = getAdvice(forecast, hour);
 
     return (
         <main>
@@ -73,13 +66,14 @@ function App() {
             <section>
                 <h2>Right now</h2>
                 <p>
-                    {data.hourly.temperature_2m[hour]}
-                    {data.hourly_units.temperature_2m}
+                    {forecast.hourly.temperature_2m[hour]}
+                    {forecast.hourly_units.temperature_2m}
                 </p>
                 <p>
-                    Rain chance: {data.hourly.precipitation_probability[hour]}%
+                    Rain chance:{' '}
+                    {forecast.hourly.precipitation_probability[hour]}%
                 </p>
-                <p>UV index: {data.hourly.uv_index[hour]}</p>
+                <p>UV index: {forecast.hourly.uv_index[hour]}</p>
             </section>
 
             <section>

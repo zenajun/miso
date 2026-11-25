@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fetching Glossary</title>
+<style>
+  :root {
+    --bg: #0a1220;          /* midnight */
+    --bg-2: #101c30;        /* deep navy */
+    --card: #14233a;        /* winter night */
+    --card-done: #13302f;   /* spruce */
+    --line: #26395a;
+    --text: #dbe7f1;        /* frost */
+    --muted: #8ea5bf;       /* slate ice */
+    --accent: #7fb8d8;      /* glacier blue */
+    --pine: #4f9e8c;        /* aurora pine */
+    --berry: #b0566d;       /* winter berry */
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%) fixed;
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 40px 16px 80px; }
+  h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .key {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 18px; margin-bottom: 24px; color: var(--muted);
+  }
+  .key strong { color: var(--text); }
+
+  .progress {
+    position: sticky; top: 0; z-index: 1; padding: 12px 0;
+    background: var(--bg); display: flex; align-items: center; gap: 12px;
+  }
+  .bar { flex: 1; height: 10px; background: var(--card); border-radius: 99px; overflow: hidden; border: 1px solid var(--line); }
+  .fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--pine)); transition: width .3s; }
+  .count { font-variant-numeric: tabular-nums; color: var(--muted); min-width: 4.5em; text-align: right; }
+
+  h2.group { margin: 36px 0 4px; font-size: 1.1rem; color: var(--accent); }
+  h2.group span { color: var(--muted); font-weight: normal; font-size: .9rem; }
+
+  .term {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 20px; margin: 12px 0; transition: background .3s, border-color .3s;
+  }
+  .term.done { background: var(--card-done); border-color: var(--pine); }
+  .term h3 { margin: 0 0 6px; font-size: 1.1rem; }
+  .eg { color: var(--muted); margin: 0 0 10px; font-size: .95rem; }
+  code {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 1px 5px; font-size: .9em; color: var(--accent);
+  }
+  textarea {
+    width: 100%; min-height: 64px; resize: vertical;
+    background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+    padding: 8px 10px; font: inherit; font-size: .95rem;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); opacity: .7; }
+  .row { display: flex; gap: 10px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  button {
+    background: transparent; color: var(--muted); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 12px; font: inherit; font-size: .85rem; cursor: pointer;
+  }
+  button:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  .hint { color: var(--muted); font-size: .8rem; }
+  .answer {
+    display: none; margin-top: 10px; padding: 10px 12px; border-left: 3px solid var(--pine);
+    background: var(--bg); border-radius: 0 8px 8px 0; font-size: .95rem;
+  }
+  .answer.show { display: block; }
+  .answer strong { color: var(--pine); }
+
+  .footer { color: var(--muted); margin-top: 28px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Fetching Glossary</h1>
+  <p class="sub">The terms from the Fetching Data lessons. Write each one in your own words first, then check.</p>
+
+  <div class="key">
+    <strong>How to use it:</strong> write the definition the way you'd explain it to a friend.
+    The <strong>Check</strong> button unlocks once you've written something. If your version
+    misses something, edit it. Don't paste the reference definition.
+  </div>
+
+  <div class="progress">
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <span class="count" id="count">0 / 0</span>
+  </div>
+
+  <div id="glossary"></div>
+
+  <p class="footer">Your definitions are saved in this browser.</p>
+</main>
+
+<script>
+  // Each term: an example from your own code, plus a reference definition hidden until you check.
+  const GROUPS = [
+    {
+      title: "Promises", sub: "the groundwork",
+      terms: [
+        { id: "promise", term: "Promise",
+          eg: "<code>fetch(url)</code> returns one straight away, before any data arrives.",
+          ref: "A placeholder for a value that isn't ready yet. It starts pending and settles once, either fulfilled or rejected." },
+        { id: "states", term: "Pending / fulfilled / rejected",
+          eg: "The three states of a promise.",
+          ref: "Pending means still waiting. Fulfilled means it finished successfully and has a value. Rejected means it failed and has an error." },
+        { id: "resolve", term: "resolve vs fulfilled",
+          eg: "<code>resolve(fallback)</code> in <code>getLocation()</code> in the weather app.",
+          ref: "resolve is the function you call to settle a promise (an action). Fulfilled is the state the promise ends up in (a status). You call resolve; the promise is fulfilled." },
+        { id: "await", term: "await",
+          eg: "<code>const res = await fetch(url)</code>",
+          ref: "Pauses the async function until the promise settles, then gives you the value inside it, or throws if it was rejected. Without await you get the promise itself, not its value." },
+        { id: "throw", term: "throw vs catch",
+          eg: "<code>throw new Error(...)</code> in <code>withFetch.js</code>.",
+          ref: "throw sends an error up and out of the function. It keeps travelling up through the callers until a catch grabs it. Only catch where you can do something useful, like showing a message or retrying." },
+      ],
+    },
+    {
+      title: "Lesson 1", sub: "fetch",
+      terms: [
+        { id: "response", term: "Response object",
+          eg: "The <code>res</code> in <code>const res = await fetch(url)</code>.",
+          ref: "What fetch resolves to once the headers arrive. It has status, ok and headers, plus methods like .json() to read the body, which may still be downloading." },
+        { id: "status", term: "Status code",
+          eg: "200, 404, 500",
+          ref: "A number the server sends to say how the request went. 2xx means success, 4xx means you asked for something wrong (404 not found), and 5xx means the server broke." },
+        { id: "resok", term: "res.ok",
+          eg: "<code>if (!res.ok) throw ...</code>",
+          ref: "true when the status is between 200 and 299. fetch doesn't reject on 404 or 500, so you check this yourself." },
+        { id: "neterr", term: "Network error",
+          eg: "Offline, a domain that doesn't exist, or a CORS block.",
+          ref: "The request never got a usable response. This is the only kind of failure where fetch itself rejects. The phone line is dead." },
+      ],
+    },
+    {
+      title: "Lesson 2", sub: "headers",
+      terms: [
+        { id: "header", term: "Header vs body",
+          eg: "DevTools → Network → Headers tab vs the Response tab.",
+          ref: "Headers are key-value notes about the request or response: the note clipped to the order slip. The body is the actual content: the food." },
+        { id: "accept", term: "Accept vs Content-Type",
+          eg: "<code>Accept: application/json</code>",
+          ref: "Accept says what format you want back. Content-Type says what format this body is in. A response uses Content-Type to describe its own body." },
+        { id: "auth", term: "Authorization header",
+          eg: "Where an API key or token usually goes.",
+          ref: "Sends credentials with the request. Keys go in a header because every request has headers (GET has no body), and the key is about the request, not the data." },
+      ],
+    },
+    {
+      title: "Lesson 3", sub: "CORS",
+      terms: [
+        { id: "origin", term: "Origin",
+          eg: "<code>http://localhost:5170</code>",
+          ref: "Protocol + host + port together. If any of the three differs, the browser treats it as a different origin." },
+        { id: "cors", term: "CORS",
+          eg: "Works in Postman, fails in the browser.",
+          ref: "Cross-Origin Resource Sharing. A browser-only rule: a page can only read a response from another origin if that server allows it. Postman, curl and servers don't enforce it." },
+        { id: "acao", term: "Access-Control-Allow-Origin",
+          eg: "Open-Meteo sends <code>*</code>.",
+          ref: "A response header where the server lists which origins may read the response: a specific origin or * for anyone. The browser checks it against your page's Origin." },
+        { id: "preflight", term: "Preflight",
+          eg: "An OPTIONS request in the Network tab, before the real one.",
+          ref: "An OPTIONS request the browser sends automatically before a non-simple cross-origin request (custom headers like Authorization, PUT or DELETE, a JSON body) to ask permission first." },
+      ],
+    },
+    {
+      title: "Lesson 4", sub: "proxies and URLs",
+      terms: [
+        { id: "url", term: "Protocol / host / port / path / query",
+          eg: "<code>http://localhost:5170/api/v1/forecast?latitude=43.65</code>",
+          ref: "Protocol: http. Host: localhost (which building). Port: 5170 (which door; every Miso app shares it). Path: /api/v1/forecast (which room; /weather/ and /hopscotch/ are rooms too). Query: ?latitude=43.65 (extra details)." },
+        { id: "proxy", term: "Reverse proxy",
+          eg: "<code>server.proxy</code> in the root <code>vite.config.js</code>",
+          ref: "A server on your own origin that forwards requests to the real API. The browser only talks to your origin, so CORS never applies, and the proxy can hold secret keys." },
+        { id: "rewrite", term: "Rewrite (200) vs redirect (301/302)",
+          eg: "Netlify <code>_redirects</code>",
+          ref: "A rewrite with 200 means the host fetches it for you (a proxy). A redirect means the host tells the browser to go there itself, which is cross-origin again, so CORS applies." },
+        { id: "serverless", term: "Serverless function",
+          eg: "What the price tracker will probably need.",
+          ref: "A small piece of backend code your host runs on demand. Use it as the waiter when a secret key is involved; the key lives in a server-side env var and never reaches the browser." },
+      ],
+    },
+    {
+      title: "Lesson 5", sub: "axios",
+      terms: [
+        { id: "boilerplate", term: "Boilerplate",
+          eg: "The <code>res.ok</code> check and <code>res.json()</code> on every fetch call.",
+          ref: "Repetitive setup code you write the same way every time. Libraries like axios exist mostly to remove it." },
+        { id: "resdata", term: "res.data (axios)",
+          eg: "<code>return res.data</code> in <code>withAxios.js</code>",
+          ref: "Where axios puts the already-parsed body. axios also rejects on 4xx and 5xx automatically, so you don't need a res.ok check." },
+        { id: "interceptor", term: "Interceptor",
+          eg: "Attaching an auth header to every request in one place.",
+          ref: "An axios feature that runs your code on every request before it goes out, or on every response before your code gets it." },
+      ],
+    },
+  ];
+
+  const KEY = "fetching-glossary";
+  const state = load();
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+  }
+
+  const root = document.getElementById("glossary");
+  const total = GROUPS.reduce((n, g) => n + g.terms.length, 0);
+
+  GROUPS.forEach(group => {
+    const h = document.createElement("h2");
+    h.className = "group";
+    h.innerHTML = `${group.title} <span>· ${group.sub}</span>`;
+    root.appendChild(h);
+
+    group.terms.forEach(t => {
+      const card = document.createElement("section");
+      card.className = "term";
+      card.innerHTML = `
+        <h3>${t.term}</h3>
+        <p class="eg">${t.eg}</p>
+        <textarea placeholder="In my own words..."></textarea>
+        <div class="row">
+          <button type="button" class="check">Check</button>
+          <span class="hint">Write something first</span>
+        </div>
+        <div class="answer"><strong>Reference:</strong> ${t.ref}</div>`;
+      root.appendChild(card);
+
+      const box = card.querySelector("textarea");
+      const btn = card.querySelector(".check");
+      const hint = card.querySelector(".hint");
+      const answer = card.querySelector(".answer");
+
+      box.value = state[t.id] || "";
+
+      function update() {
+        const written = box.value.trim().length > 0;
+        btn.disabled = !written;
+        hint.style.display = written ? "none" : "";
+        card.classList.toggle("done", written);
+        if (!written) answer.classList.remove("show");
+      }
+
+      box.addEventListener("input", () => {
+        state[t.id] = box.value;
+        save();
+        update();
+        renderProgress();
+      });
+      btn.addEventListener("click", () => {
+        const showing = answer.classList.toggle("show");
+        btn.textContent = showing ? "Hide" : "Check";
+      });
+
+      update();
+    });
+  });
+
+  function renderProgress() {
+    const done = Object.values(state).filter(v => v && v.trim()).length;
+    document.getElementById("count").textContent = `${done} / ${total}`;
+    document.getElementById("fill").style.width = `${(done / total) * 100}%`;
+  }
+  renderProgress();
+</script>
+</body>
+</html>
