@@ -4,7 +4,7 @@
 import {apps} from './apps.js';
 import './style.css';
 
-const links = [{name: 'Home', emoji: '🏠', path: '/home/'}, ...apps];
+const links = [{name: 'Home', emoji: '🏠', path: `${import.meta.env.BASE_URL}home/`}, ...apps];
 
 // Remember open/closed across page loads. Every app shares one origin, so they share
 // this storage. try/catch because storage can be blocked (e.g. some private windows).

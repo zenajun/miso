@@ -53,7 +53,7 @@ function getLocation() {
 }
 
 function buildUrl({latitude, longitude}) {
-    return `/api/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation_probability,uv_index&timezone=auto&forecast_days=1`;
+    return `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation_probability,uv_index&timezone=auto&forecast_days=1`;
 }
 
 function currentHourAt(data) {

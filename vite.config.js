@@ -6,11 +6,11 @@ import {defineConfig} from 'vite';
 //   /home/  /weather/  /hopscotch/  /fetch-lab/
 const appNames = ['home', 'weather', 'hopscotch', 'fetch-lab'];
 
-// Send the bare root "/" to the homepage.
+// Send the bare root "/" (and "/miso/") to the homepage.
 function rootToHome() {
     const redirect = (req, res, next) => {
-        if (req.url !== '/') return next();
-        res.writeHead(302, {Location: '/home/'});
+        if (req.url !== '/' && req.url !== '/miso/') return next();
+        res.writeHead(302, {Location: '/miso/home/'});
         res.end();
     };
     return {
@@ -27,27 +27,31 @@ function rootToHome() {
 
 // https://vite.dev/config/
 export default defineConfig({
+    base: '/miso/',
     root: 'apps',
     plugins: [react(), rootToHome()],
     server: {
         port: 5170,
         strictPort: true,
-        proxy: {
-            // Weather app: forward /api/... to Open-Meteo to avoid CORS.
-            '/api': {
-                target: 'https://api.open-meteo.com',
-                changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, ''),
-            },
-        },
     },
     build: {
         outDir: '../dist',
         emptyOutDir: true,
         rollupOptions: {
-            input: Object.fromEntries(
-                appNames.map((name) => [name, resolve(import.meta.dirname, 'apps', name, 'index.html')]),
-            ),
+            input: {
+                index: resolve(import.meta.dirname, 'apps', 'index.html'),
+                ...Object.fromEntries(
+                    appNames.map((name) => [
+                        name,
+                        resolve(
+                            import.meta.dirname,
+                            'apps',
+                            name,
+                            'index.html',
+                        ),
+                    ]),
+                ),
+            },
         },
     },
 });
