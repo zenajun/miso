@@ -1,0 +1,35 @@
+# B0 R1 spike: can GitHub's servers read a well.ca product page?
+# Throwaway: runs only on the spike/r1 branch, and is deleted afterwards.
+# Logs only the HTTP status and yes/no answers. Never the page, the price or errors' text.
+name: Spike R1 (well.ca reachability)
+
+on:
+  push:
+    branches: [spike/r1]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Fetch one neutral well.ca page
+        run: |
+          node --input-type=module -e '
+          const url = "https://well.ca/products/guests-on-earth-dish-soap-bulk_366829.html";
+          try {
+            const res = await fetch(url, {
+              headers: { "User-Agent": "miso-price-tracker-spike/0.1 (personal project)" },
+              signal: AbortSignal.timeout(15000),
+            });
+            const html = await res.text();
+            const priceFound = /property="og:price:amount"\s+content="\d/.test(html);
+            console.log(`status: ${res.status}`);
+            console.log(`price found: ${priceFound ? "yes" : "no"}`);
+          } catch (err) {
+            // Only the error name: messages can contain the URL.
+            console.log(`network error: ${err.name}`);
+          }
+          '
