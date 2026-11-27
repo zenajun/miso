@@ -2,3 +2,7 @@ node_modules
 .env
 recall.md
 dist
+
+# AI-DLC project docs and personal learning log: kept local, never public
+aidlc-docs/
+learning/aidlc-skills-log.md
